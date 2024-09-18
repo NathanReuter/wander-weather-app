@@ -1,29 +1,33 @@
-import axios from 'axios';
-import {Weather} from '../models/weatherModel';
+import {Weather, WeatherModel} from '../models/weatherModel';
+import { isTemperatureOutOfRange } from '../utils/tempValidator';
 
-const API_URL = 'https://staging.v4.api.wander.com/hiring-test/weather';
+const DEFAULT_CACHE_TIME = 3600; // Default cache time (1 hour in seconds)
 
-export const fetchWeather = async (location: string, date: string): Promise<{ celcius?: number, fahrenheit?: number }> => {
-    const maxAttempts = 3;
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-        try {
-            const response = await axios.post(API_URL, {
-                city: location,
-                date: date
-            });
-
-            return response.data;
-        } catch (error: any) {
-            if (error.response && error.response.status === 429) {
-                // If the rate limit is exceeded, wait for 1 second and try again
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-
-            attempts++;
-        }
+export const insertWeatherWithCache = async (weather: Weather, cacheTime: number = DEFAULT_CACHE_TIME): Promise<void> => {
+    if (!weather.location || !weather.date || !weather.temperatureCelsius || !weather.temperatureFahrenheit) {
+        throw new Error('One or more required fields are missing');
     }
 
-    throw new Error('Failed to fetch temperature from api. Max attempts reached');
-}
+    if (isTemperatureOutOfRange(weather.temperatureCelsius, weather.temperatureFahrenheit)) {
+        throw new Error('Temperature is out of range');
+    }
+
+    const expiresAt = Math.floor(Date.now() / 1000) + cacheTime;
+    return WeatherModel.insert(weather, expiresAt);
+};
+
+export const getWeatherByLocationAndDate = async (location: string, date: string): Promise<Weather | null> => {
+    const weather = await WeatherModel.select(location, date);
+    if (weather) {
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (weather.expiresAt && currentTime > weather.expiresAt) {
+            return null;
+        }
+        return weather;
+    }
+    return null;
+};
+
+export const getAllCachedTemperatures = async (): Promise<Weather[]> => {
+    return WeatherModel.selectAll(); // Fetch all cached temperatures via the model
+};

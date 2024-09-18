@@ -1,16 +1,31 @@
 import { Request, Response } from 'express';
-import {fetchWeather} from "../services/weatherService";
-import {getWeatherByLocationAndDate, insertWeatherWithCache} from "../models/weatherModel";
 import {celsiusToFahrenheit, fahrenheitToCelsius} from "../utils/tempConverter";
+import {DateTime} from "luxon";
+import {getWeatherByLocationAndDate, insertWeatherWithCache} from "../services/weatherService";
+import {fetchWeather} from "../vendors/wanderWeatherAPIService";
 
 export const getWeatherHandler = async (req: Request, res: Response) => {
     const {location, date} = req.params;
 
     try {
+        if (!DateTime.fromISO(date).isValid) {
+            throw new Error('Invalid date format');
+        }
+
         const cachedWeather = await getWeatherByLocationAndDate(location, date);
 
         if (cachedWeather) {
-            return cachedWeather;
+            res.json({
+                data: {
+                    location: cachedWeather.location,
+                    date: cachedWeather.date,
+                    temperature: {
+                        celcius: cachedWeather.temperatureCelsius,
+                        fahrenheit: cachedWeather.temperatureFahrenheit
+                    }
+                }
+            });
+            return;
         }
 
         const weatherData = await fetchWeather(location, date);
@@ -25,7 +40,7 @@ export const getWeatherHandler = async (req: Request, res: Response) => {
         }
 
         await insertWeatherWithCache({
-            date: new Date().toISOString(),
+            date,
             location,
             temperatureCelsius: celcius,
             temperatureFahrenheit: fahrenheit,
