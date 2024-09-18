@@ -1,7 +1,7 @@
-import express from 'express';
+import { Router } from 'express';
 import {getWeatherHandler} from "../controllers/weatherController";
 
-const router = express.Router();
+const router = Router();
 
 router.get('/:location/:date', getWeatherHandler)
 
