@@ -11,6 +11,7 @@ initializeDatabase();
 
 app.use(json());
 app.use(rateLimiter);
+app.get('/health', (_, res) => res.send('Healthy'));
 app.use('/api/v1/weather', weatherRoutes);
 app.use(errorHandler);
 
