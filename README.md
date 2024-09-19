@@ -74,6 +74,19 @@ cd wander-weather-app
    npm start
    ```
 
+### Testing the Application
+
+To test the application API, you can make a `GET` request to the following route:
+
+Example HTTP request:
+```bash
+http get http://localhost:3000/api/v1/weather/NewYork/2024-09-16
+```
+
+- This will fetch the weather data for **New York** on **September 16, 2024**, returning temperatures in both Celsius and Fahrenheit.
+
+Alternatively, you can test with other cities and dates by replacing `NewYork` and `2024-09-16` with your desired city and date.
+
 ### Running Tests
 
 The project uses **Jest** for testing. To run the test suite:
@@ -170,7 +183,3 @@ The application includes robust error handling to deal with:
 ## Conclusion
 
 This project demonstrates a weather app that effectively fetches and caches temperature data while handling API rate limits and errors. Docker is used for easy setup, and Jest ensures a comprehensive test suite.
-
----
-
-This README now includes both `yarn` and `npm` commands as options. Let me know if you need any further modifications!
