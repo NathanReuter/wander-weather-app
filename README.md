@@ -1,274 +1,176 @@
-Here’s your final adjusted README, reflecting all the necessary steps for cleaning, building, and running your Docker Compose setup, as well as other relevant sections for installing, developing, running tests, and deploying.
-
-### README.md
-
-```md
 # Wander Weather App
 
-This project is a weather application that fetches weather data based on location and date using an external API. It caches the weather data locally using SQLite for performance improvements.
+## Project Overview
 
-## Table of Contents
+This Node.js application, written in TypeScript, interacts with a weather API to fetch temperature data based on user-provided date and location parameters. It includes efficient API rate limit handling, data formatting, and data persistence via SQLite for caching.
 
-- [Installation](#installation)
-- [Development](#development)
-- [Running Tests](#running-tests)
-- [Building the Application](#building-the-application)
-- [Running the Application](#running-the-application)
-- [Running with Docker](#running-with-docker)
-- [Cleaning Docker Compose](#cleaning-docker-compose)
-- [Deploying the Container](#deploying-the-container)
-  
-## Installation
+## Features
+- **Fetch Temperature Data**: The API accepts a city and a date, returning the temperature in both Celsius and Fahrenheit.
+- **Rate Limiting**: Handles up to 5 requests per 10 seconds as permitted by the API.
+- **Caching Mechanism**: Uses SQLite to cache requests to prevent unnecessary API hits and reduce the risk of exceeding rate limits.
+- **Temperature Conversion**: Automatically converts the temperature data from Celsius to Fahrenheit or vice versa.
+- **Error Handling**: Handles random errors and ensures API responses are properly formatted.
+- **Containerized**: The application is fully containerized using Docker for easy deployment.
+- **Testing**: Comprehensive tests cover API integration, data conversion, caching, and error handling.
 
-Before you start, ensure you have the following tools installed:
+## API Endpoint Documentation
+The weather data is fetched from the Wander API:
+[Wander API Documentation](https://staging.v4.api.wander.com/documentation/hiring-test/weather)
 
-- **Node.js** (version 18.x or higher)
-- **Yarn** (recommended) or npm
-- **Docker** and **Docker Compose** (for containerization)
+## Getting Started
+
+### Prerequisites
+- **Node.js**: Make sure you have Node.js v16 or higher installed.
+- **Yarn** or **npm**: You can use either Yarn or npm as the package manager, based on your preference.
+- **Docker**: Ensure you have Docker installed to run the application in a container.
 
 ### Clone the Repository
-
 ```bash
-git clone https://github.com/your-username/wander-weather-app.git
+git clone <your-repo-url>
 cd wander-weather-app
 ```
 
-### Install Dependencies
+### Installation
 
-Install the project dependencies using Yarn:
+1. Install dependencies:
+   Using **Yarn**:
+   ```bash
+   yarn install
+   ```
+   Or, using **npm**:
+   ```bash
+   npm install
+   ```
 
-```bash
-yarn install
-```
+2. Set up the environment variables:
+   Create a `.env` file in the root directory with the following content:
+   ```bash
+   WANDER_WEATHER_API_ENDPOINT=<endpoint>
+   ```
 
-If you're using npm:
+### Running the Application
 
-```bash
-npm install
-```
+1. **Run Locally**:
+   To run the application locally with hot-reloading:
+   Using **Yarn**:
+   ```bash
+   yarn dev
+   ```
+   Or, using **npm**:
+   ```bash
+   npm run dev
+   ```
 
-## Development
+2. **Build and Run**:
+   To build the TypeScript files and start the production server:
+   Using **Yarn**:
+   ```bash
+   yarn build
+   yarn start
+   ```
+   Or, using **npm**:
+   ```bash
+   npm run build
+   npm start
+   ```
 
-### Running the App in Development Mode
+### Running Tests
 
-You can run the app in development mode using `nodemon`, which will automatically restart the server when files change:
-
-```bash
-yarn dev
-```
-
-or
-
-```bash
-npm run dev
-```
-
-### Environment Variables
-
-Create a `.env` file in the root directory to configure your environment variables:
-
-```bash
-touch .env
-```
-
-Add any required environment variables, for example:
-
-```bash
-API_URL=https://staging.v4.api.wander.com/hiring-test/weather
-```
-
-## Running Tests
-
-This project uses **Jest** for unit testing. You can run all the tests using:
-
+The project uses **Jest** for testing. To run the test suite:
+Using **Yarn**:
 ```bash
 yarn test
 ```
-
-or
-
+Or, using **npm**:
 ```bash
 npm run test
 ```
 
-### Running Tests with Coverage
-
-To run tests with coverage reports:
-
+To generate a coverage report:
+Using **Yarn**:
 ```bash
-yarn test --coverage
+yarn coverage
 ```
-
-## Linting
-
-To check for linting errors using **ESLint**:
-
+Or, using **npm**:
 ```bash
-yarn lint
+npm run coverage
 ```
 
-or
+### Docker
 
-```bash
-npm run lint
+1. **Build Docker Image**:
+   You can build the Docker image using the following command:
+   Using **Yarn**:
+   ```bash
+   yarn docker:build
+   ```
+   Or, using **npm**:
+   ```bash
+   npm run docker:build
+   ```
+
+2. **Run Docker Container**:
+   Run the application using Docker:
+   ```bash
+   docker-compose up
+   ```
+
+3. **Stop Docker Container**:
+   To stop and remove the running containers:
+   Using **Yarn**:
+   ```bash
+   yarn docker:stop
+   ```
+   Or, using **npm**:
+   ```bash
+   npm run docker:stop
+   ```
+
+### Directory Structure
+```text
+├── src
+│   ├── controllers
+│   │   └── weatherController.ts
+│   ├── db
+│   │   ├── database.ts
+│   │   └── initializer.ts
+│   ├── models
+│   │   └── weatherModel.ts
+│   ├── services
+│   │   └── weatherService.ts
+│   ├── utils
+│   │   ├── tempConverter.ts
+│   │   └── tempValidator.ts
+│   └── vendors
+│       └── wanderWeatherAPIService.ts
+├── tests
+│   └── weatherController.test.ts
+├── dist
+│   └── (Compiled files)
+├── package.json
+├── Dockerfile
+├── docker-compose.yml
+└── jest.config.ts
 ```
 
-You can also fix some of the linting issues automatically with:
+### Caching
+The application stores weather data in an SQLite database for caching. This helps reduce API calls, preventing rate limit issues. Cached data is stored by city and date, ensuring it's only valid for a reasonable time period.
 
-```bash
-yarn lint --fix
-```
+### Error Handling
+The application includes robust error handling to deal with:
+- API rate limits
+- Random errors from the weather service
+- Inconsistent temperature units
 
-## Building the Application
+### Assumptions
+- The caching mechanism is designed to cache each response for a fixed period to avoid outdated data.
+- The application handles both Celsius and Fahrenheit temperature formats returned by the API, converting them as necessary.
+- The API is subject to rate limiting (5 requests per 10 seconds per IP). The app respects this limit using rate-limiting middleware.
 
-To transpile the TypeScript code into JavaScript and prepare the project for production:
+## Conclusion
 
-```bash
-yarn build
-```
+This project demonstrates a weather app that effectively fetches and caches temperature data while handling API rate limits and errors. Docker is used for easy setup, and Jest ensures a comprehensive test suite.
 
-or
+---
 
-```bash
-npm run build
-```
-
-The transpiled files will be located in the `dist` directory.
-
-## Running the Application
-
-Once the project is built, you can start the application using:
-
-```bash
-yarn start
-```
-
-or
-
-```bash
-npm run start
-```
-
-This will start the application, and it will be accessible at `http://localhost:3000`.
-
-### SQLite Database
-
-The application uses SQLite for caching weather data. A `weather.db` file will be created automatically in the project root when the application is run.
-
-## Running with Docker
-
-### Docker Setup
-
-This project includes a `Dockerfile` and `docker-compose.yml` for running the application in Docker.
-
-### Build and Run the App with Docker Compose
-
-To build and run the app using Docker Compose:
-
-1. Build and start the containers:
-
-    ```bash
-    yarn docker:build
-    ```
-
-   This command will first build the TypeScript project and then run the containers.
-
-2. The app will be available at `http://localhost:3000`.
-
-### Stop the Containers
-
-To stop the containers, run:
-
-```bash
-yarn docker:stop
-```
-
-### Dockerfile
-
-Here’s a brief description of the **Dockerfile**:
-- The Dockerfile is based on the Node.js Alpine image for a lightweight container.
-- It copies the project files into the container and installs the dependencies.
-- It exposes port 3000 for the application.
-
-### Docker Compose
-
-Here’s a brief description of the **docker-compose.yml** file:
-- The `app` service builds and runs the Node.js app.
-- The `db` service uses SQLite to store the database.
-- The services are set up with volumes so that local changes are reflected inside the container, and the database is persisted.
-
-## Cleaning Docker Compose
-
-If you need to clean up your Docker Compose setup (removing containers, images, and volumes), follow these steps:
-
-1. **Stop and Remove Containers**:
-
-    ```bash
-    docker-compose down
-    ```
-
-2. **Remove Docker Images and Volumes**:
-
-   To remove dangling images and unused volumes:
-
-    ```bash
-    docker system prune -a
-    docker volume prune
-    ```
-
-3. **Rebuild the Docker Containers**:
-
-   After cleaning, you can rebuild the containers using:
-
-    ```bash
-    docker-compose up --build
-    ```
-
-   This will rebuild the images and start the containers fresh.
-
-Alternatively, you can use the following command to clean everything related to Docker Compose in one go:
-
-```bash
-docker-compose down --rmi all --volumes --remove-orphans
-```
-
-- **`--rmi all`**: Removes all images used by services.
-- **`--volumes`**: Removes all volumes created by services.
-- **`--remove-orphans`**: Removes containers for services that are no longer defined in your `docker-compose.yml`.
-
-## Deploying the Container
-
-To deploy this container to a cloud service (such as AWS, DigitalOcean, or GCP), follow these steps:
-
-1. **Build the Docker image**:
-
-    ```bash
-    docker build -t wander-weather-app .
-    ```
-
-2. **Run the image locally** to test it:
-
-    ```bash
-    docker run -p 3000:3000 wander-weather-app
-    ```
-
-3. **Push the Docker image** to a container registry (e.g., Docker Hub, AWS ECR, etc.):
-
-    ```bash
-    docker tag wander-weather-app your-docker-username/wander-weather-app
-    docker push your-docker-username/wander-weather-app
-    ```
-
-4. **Deploy to your cloud provider** (you can use services like AWS ECS, DigitalOcean App Platform, Heroku, etc.).
-
-## License
-
-This project is licensed under the MIT License.
-```
-
-### Key Additions:
-1. **Cleaning Docker Compose**: Steps to clean up the Docker environment using `docker-compose down` and `docker system prune`.
-2. **Docker Deployment**: Instructions for pushing the Docker image to a container registry and deploying it to a cloud platform.
-3. **Build and Development**: Steps for running the app in development mode, testing, and building it.
-
-Let me know if this final version of the README works for you!
+This README now includes both `yarn` and `npm` commands as options. Let me know if you need any further modifications!

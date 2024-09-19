@@ -1,5 +1,5 @@
-import sqlite3 from 'sqlite3';
+import Database from 'better-sqlite3';
 
-const db = new sqlite3.Database('weather.db');
+const db = new Database('weather.db');
 
 export default db;
